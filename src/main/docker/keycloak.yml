@@ -1,5 +1,18 @@
 version: '2'
 services:
+  keycloak-mysql:
+    image: mysql:8.0.20
+    #    container_name: mysql
+    volumes:
+      - ~/Documents/volumes/keycloak:/var/lib/mysql/
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=keycloak
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 3306:3306
+    command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
   keycloak:
     image: jboss/keycloak:10.0.0
     command:
@@ -16,10 +29,16 @@ services:
     volumes:
       - ./realm-config:/opt/jboss/keycloak/realm-config
     environment:
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
-      - DB_VENDOR=h2
+      - KEYCLOAK_USER=admin1
+      - KEYCLOAK_PASSWORD=admin1
+      - DB_VENDOR=MYSQL
+      - DB_ADDR=keycloak-mysql
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_DATABASE=keycloak?allowPublicKeyRetrieval=true&useSSL=false
     ports:
       - 9080:9080
       - 9443:9443
       - 10990:10990
+    depends_on:
+      - keycloak-mysql
